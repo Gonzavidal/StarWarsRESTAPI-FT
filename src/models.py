@@ -110,26 +110,27 @@ class Planet(db.Model):
         db.session.delete(self)
         db.session.commit()
 			
-class Favourite(db.Model):
-    __tablename__ = "favourites"
-    id = db.Column(db.Integer, primary_key=True)
+class Favourite_character(db.Model):
+    __tablename__ = "favourites_character"
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    character_id = db.Column(db.Integer, db.ForeignKey("characters.id"))
-    planet_id = db.Column(db.Integer, db.ForeignKey("planets.id"))
-
-    def serialize(self):
-        return{
-            "id": self.id,
-            "user_id": self.user_id,
-            "character_id": self.character_id,
-            "planet_id": self.planet_id        
-        }
+    character_id = db.Column(db.Integer, db.ForeignKey("characters.id"), primary_key=True)
 
     def save(self):
         db.session.add(self)
         db.session.commit()
 
-    def update(self):
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
+class Favourite_planet(db.Model):
+    __tablename__ = "favourites_planet"
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    planet_id = db.Column(db.Integer, db.ForeignKey("planets.id"),  primary_key=True)
+
+    def save(self):
+        db.session.add(self)
         db.session.commit()
 
     def delete(self):

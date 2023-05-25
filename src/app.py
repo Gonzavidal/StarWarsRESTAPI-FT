@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Character, Planet
+from models import db, User, Character, Planet, Favourite_planet, Favourite_character
 #from models import Person
 
 app = Flask(__name__)
@@ -124,6 +124,53 @@ def delete_planet(id):
     planet.delete()
 
     return jsonify({ "msg": "The planet has been destroyed"}), 200
+
+@app.route('/user/favourites', methods=['GET'])
+def user_favourites():
+    favsP = Favourite_planet.query.all()
+    favsC = Favourite_character.query.all()
+
+    favsListPlanet = [fav.serialize() for fav in favsP]
+    favsListChr = [fav.serialize() for fav in favsC]
+
+    return jsonify({"favourite_planets": favsListPlanet, "favourite_characters": favsListChr}), 200
+
+
+@app.route('/favourites/planet/<int:id>', methods=['POST', 'DELETE'])
+def add_delete_fav_planet(id):
+    if request.method == 'POST':
+        user = User.query.get(id)
+
+        if user:
+            favourite = Favourite_planet()
+            favourite.planet_id = id
+            favourite.user_id = user.id
+            favourite.save()
+
+            return jsonify({"msg": "Planet has been added to the Rebellion"})
+        else:
+            return jsonify({"error": "User not found"})
+
+    elif request.method == 'DELETE':
+        favourite = Favourite_planet.query.filter_by(planet_id=id).first()
+
+        if favourite:
+            favourite.delete()
+            return jsonify({"msg": "Planet has been removed from the Rebellion"})
+        else:
+            return jsonify({"error": "Planet is not in the Rebellion"})
+
+
+
+
+
+# @app.route('favourites/planet/<int:planet_id>', methods=['DELETE'])
+
+
+
+# @app.route('favourites/people/<int:people_id>', methods=['POST'])
+
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
